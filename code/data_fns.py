@@ -7,7 +7,7 @@ import numpy as np
 ## Data Interpolation ##
 # df is dataframe to interpolate in, cols is a list of columns (excluding sed rates) to interpolate
 # assume that df contains depth column labeled "Depth [mbsf]", and is sorted by depth in ascending order (shallow->deep)
-# if sed rate is set to true, we assume that a column labeled "Sedimentation Rate [m/Ma]" exists
+# if sed rate is set to true, we assume that a column labeled "Sedimentation Rate [m/Myr]" exists
 # set sed rate to false if no sed rates in data
 # fill_final_rates: do you want the lowest sed rate value to extend down for the rest of the data?
 def interpolate(df, cols, sed_rates=True, fill_final_rates=True):
@@ -19,7 +19,7 @@ def interpolate(df, cols, sed_rates=True, fill_final_rates=True):
     # do sed rates if requested--use the bfill method of the fillna function
     # this doesn't handle any NaNs below the final sed rate point, will handle those below
     if sed_rates:
-        interpolated["Sedimentation Rate [m/Ma]"] = interpolated["Sedimentation Rate [m/Ma]"].fillna(method="backfill")
+        interpolated["Sedimentation Rate [m/Myr]"] = interpolated["Sedimentation Rate [m/Myr]"].fillna(method="backfill")
 
     # we have been using the depth as an index, all done with that now.
     # reset index restores depth as one of the columns
@@ -27,10 +27,10 @@ def interpolate(df, cols, sed_rates=True, fill_final_rates=True):
 
     # last, fill in the final few sed rate rows if requested, using last_valid_index
     if sed_rates and fill_final_rates:
-        last_ind = interpolated["Sedimentation Rate [m/Ma]"].last_valid_index()
-        if last_ind < len(interpolated["Sedimentation Rate [m/Ma]"]) - 1:  # if we aren't at the end already
-            interpolated["Sedimentation Rate [m/Ma]"].iloc[last_ind + 1:] = \
-                interpolated["Sedimentation Rate [m/Ma]"][last_ind]
+        last_ind = interpolated["Sedimentation Rate [m/Myr]"].last_valid_index()
+        if last_ind < len(interpolated["Sedimentation Rate [m/Myr]"]) - 1:  # if we aren't at the end already
+            interpolated["Sedimentation Rate [m/Myr]"].iloc[last_ind + 1:] = \
+                interpolated["Sedimentation Rate [m/Myr]"][last_ind]
 
     return interpolated
 
@@ -164,7 +164,7 @@ def sed_avg_plot(df, scale=1):
     # not all sed rate intervals will have any magnetite points, so drop rows that are nan for magnetite
     # need to drop nans or else numpy will return nan for the mean
     dropped = df.dropna(subset=["Magnetite [ppm]"])
-    grouped = dropped.groupby("Sedimentation Rate [m/Ma]")
+    grouped = dropped.groupby("Sedimentation Rate [m/Myr]")
 
     # now we have a grouped DF. Let's do some statistics
     # reset the index because it is currently sedimentation rate
@@ -172,7 +172,7 @@ def sed_avg_plot(df, scale=1):
 
     # now plot the averaged values
     fig, ax = plt.subplots()
-    sc = ax.scatter(avgd["Magnetite [ppm]"]["mean"], avgd["Sedimentation Rate [m/Ma]"], c="g",
+    sc = ax.scatter(avgd["Magnetite [ppm]"]["mean"], avgd["Sedimentation Rate [m/Myr]"], c="g",
                     s=avgd["Magnetite [ppm]"]["size"]*scale)
     return fig, ax, sc
 
