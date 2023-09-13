@@ -8,3 +8,6 @@ The data presented in the thesis are all provided in the `data` folder. There is
 
 ## Code
 The code used to analyze the data and generate the figures in the main text and supplement is all in the `code` folder. All analysis and plotting was done in Jupyter Notebooks using a Python kernel. There is (in general) one file per site. Main text figures were produced using the `histograms` and `compilation_plots` files. Since many of the tasks are repetitive from site to site (import and clean data, synchronize depth scales, interpolate, plot), we created and also provide here a small library of functions for convenience (see `data_fns`).
+
+### Software Versions
+Written in PyCharm 2022.2.3 using Python 3.8, pandas 1.3.5, matplotlib 3.5.0, numpy 1.20.3, cartopy 0.18.0, and jupyter 1.0.0
