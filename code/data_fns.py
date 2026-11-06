@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import statsmodels.api as sm
 
 
 ## Data Interpolation ##
@@ -176,6 +177,49 @@ def sed_avg_plot(df, scale=1):
                     s=avgd["Magnetite [ppm]"]["size"]*scale)
     return fig, ax, sc
 
+# function to plot linear regression info on top of an existing comparison plot
+# takes existing ax and regression results object
+# returns nothing
+def plot_regression(ax, results, format="k--"):
+    b,m = results.params
+    ylim = ax.get_ylim()
+    xlim = ax.get_xlim()
+    # plot line using x-axis bounds
+    pts = list(ax.get_xlim())
+    ax.plot(pts, [b + m * pts[0], b + m * pts[1]], format, lw=1) # from the equation of a line
+    # don't change the axis limits
+    ax.set_ylim(ylim)
+    ax.set_xlim(xlim)
+    return
+
+# function to create strings of r squared, p values, and equation of line for plotting
+# easier to explicitly plot strings in each file b/c location will vary
+# returns three strings
+def get_stats(results, p_digs=3, m_digs=3, b_digs=3):
+    rsquared = str(round(results.rsquared,3))
+    pvalue = str(round(results.pvalues[1],p_digs)) # the zeroth p-value is for the constant
+    b,m = results.params
+    
+    rsquared_str = "$R^2$ = " + rsquared
+    pvalue_str = "p = " + pvalue
+    equation_str = "y = " + str(round(m, m_digs)) + "x + " + str(round(b, b_digs))
+    return rsquared_str, pvalue_str, equation_str
+
+## Statistics ##
+# function to do a linear regression between two parameters
+# takes dataframe (interpolated), name of dependent variable (y-axis, not magnetite),
+#   and name of independent variable (x-axis, magnetite)
+# returns a RegressionResults object
+def regress(df, dep_name, ind_name):
+    # select just the two parameters of interest and then clean NaNs
+    cleaned = df[[dep_name, ind_name]].dropna()
+    dep_data = cleaned[dep_name].to_list()
+    ind_data = cleaned[ind_name].to_list()
+    # add constant column to independent variable so that regression intercept is not 0
+    ind_data = sm.add_constant(ind_data)
+    model = sm.OLS(dep_data, ind_data)
+    results = model.fit()
+    return results
 
 ## Writing Output ##
 # function to append data to a compilation excel sheet
